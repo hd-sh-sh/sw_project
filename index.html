@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NASA SpaceWeather Intelligence - Side Rail Edition</title>
+    <title>NASA SpaceWeather Intelligence - Professional Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
     <style>
@@ -13,7 +13,7 @@
             --bg-color: #010409;
             --aurora-1: rgba(0, 82, 165, 0.2);
             --aurora-2: rgba(16, 185, 129, 0.1);
-            --sidebar-width: 70px;
+            --sidebar-width: 74px;
         }
 
         body { 
@@ -25,264 +25,164 @@
             transition: background-color 1s ease;
         }
 
-        /* 동적 오로라 배경 */
-        #aurora-bg {
-            position: fixed;
-            inset: 0;
-            z-index: -1;
-            overflow: hidden;
-            pointer-events: none;
-        }
+        #aurora-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+        .aurora-layer { position: absolute; width: 150%; height: 150%; top: -25%; left: -25%; filter: blur(80px); opacity: 0.5; transition: all 1.5s ease; }
+        .glow-1 { background: radial-gradient(circle at 20% 30%, var(--aurora-1) 0%, transparent 50%); animation: drift 20s infinite alternate; }
+        .glow-2 { background: radial-gradient(circle at 80% 70%, var(--aurora-2) 0%, transparent 50%); animation: drift 25s infinite alternate-reverse; }
+        @keyframes drift { from { transform: translate(-5%, -5%) rotate(0deg); } to { transform: translate(5%, 5%) rotate(5deg); } }
 
-        .aurora-layer {
-            position: absolute;
-            width: 150%;
-            height: 150%;
-            top: -25%;
-            left: -25%;
-            filter: blur(80px);
-            opacity: 0.5;
-            transition: all 1.5s ease;
-        }
-
-        .glow-1 {
-            background: radial-gradient(circle at 20% 30%, var(--aurora-1) 0%, transparent 50%);
-            animation: drift 20s infinite alternate;
-        }
-
-        .glow-2 {
-            background: radial-gradient(circle at 80% 70%, var(--aurora-2) 0%, transparent 50%);
-            animation: drift 25s infinite alternate-reverse;
-        }
-
-        @keyframes drift {
-            from { transform: translate(-5%, -5%) rotate(0deg); }
-            to { transform: translate(5%, 5%) rotate(5deg); }
-        }
-
-        /* 상태별 컬러 테마 */
-        body.lvl-1 { --aurora-1: rgba(16, 185, 129, 0.2); --aurora-2: rgba(59, 130, 246, 0.2); }
+        /* 단계별 배경 테마 */
+        body.lvl-1 { --aurora-1: rgba(16, 185, 129, 0.25); --aurora-2: rgba(59, 130, 246, 0.2); }
         body.lvl-2 { --aurora-1: rgba(59, 130, 246, 0.2); --aurora-2: rgba(45, 212, 191, 0.2); }
-        body.lvl-3 { --aurora-1: rgba(234, 179, 8, 0.15); --aurora-2: rgba(16, 185, 129, 0.15); }
-        body.lvl-4 { --aurora-1: rgba(249, 115, 22, 0.2); --aurora-2: rgba(124, 58, 237, 0.15); }
-        body.lvl-5 { --aurora-1: rgba(220, 38, 38, 0.3); --aurora-2: rgba(30, 41, 59, 0.5); }
+        body.lvl-3 { --aurora-1: rgba(234, 179, 8, 0.2); --aurora-2: rgba(249, 115, 22, 0.15); }
+        body.lvl-4 { --aurora-1: rgba(249, 115, 22, 0.25); --aurora-2: rgba(220, 38, 38, 0.1); }
+        body.lvl-5 { --aurora-1: rgba(220, 38, 38, 0.35); --aurora-2: rgba(30, 41, 0.6); }
 
-        .glass { 
-            background: rgba(13, 17, 23, 0.6); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-        }
-
-        /* 사이드 내비게이션 스타일 */
-        .side-rail {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: var(--sidebar-width);
-            background: rgba(1, 4, 9, 0.9);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 50;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 0;
-        }
-
-        .nav-item {
-            position: relative;
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-            color: #64748b;
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-            border-radius: 12px;
-        }
-
-        .nav-item.active {
-            color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
-            box-shadow: inset 0 0 10px rgba(96, 165, 250, 0.1);
-        }
-
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: -13px;
-            width: 3px;
-            height: 18px;
-            background: #60a5fa;
-            border-radius: 0 4px 4px 0;
-            box-shadow: 2px 0 10px rgba(96, 165, 250, 0.5);
-        }
-
-        .tech-card { position: relative; overflow: hidden; }
-        .tech-card::before {
-            content: '';
-            position: absolute;
-            top: 10px; left: 10px;
-            width: 6px; height: 6px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .scanline {
-            width: 100%; height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-            position: absolute; top: 0;
-            animation: scan 4s linear infinite;
-        }
-        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
-
-        .status-pulse { animation: status-pulse 3s infinite ease-in-out; }
-        @keyframes status-pulse { 
-            0%, 100% { transform: scale(1); filter: brightness(1); } 
-            50% { transform: scale(1.02); filter: brightness(1.2); } 
-        }
-
-        .page-transition { animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .glass { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.08); }
         
-        main {
-            padding-left: calc(var(--sidebar-width) + 16px);
-            padding-right: 16px;
-            padding-top: 100px;
+        .side-rail { 
+            position: fixed; 
+            left: 0; top: 0; bottom: 0; 
+            width: var(--sidebar-width); 
+            background: rgba(1, 4, 9, 0.95); 
+            border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            z-index: 50; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            padding: 24px 0; 
         }
 
-        @media (max-width: 640px) {
-            :root { --sidebar-width: 60px; }
-            main { padding-left: calc(var(--sidebar-width) + 12px); }
+        /* 내비게이션 아이템 개선 (비활성 가시성 확보) */
+        .nav-item { 
+            position: relative; 
+            width: 48px; 
+            height: 48px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 20px; 
+            color: #475569; 
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+            border-radius: 14px; 
         }
 
+        .nav-item:hover:not(.active) {
+            color: #94a3b8;
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .nav-item.active { 
+            color: #60a5fa; 
+            background: rgba(96, 165, 250, 0.12); 
+            border-color: rgba(96, 165, 250, 0.3);
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.1);
+        }
+        
+        .nav-item.active::before { 
+            content: ''; 
+            position: absolute; 
+            left: -14px; 
+            width: 4px; 
+            height: 20px; 
+            background: #60a5fa; 
+            border-radius: 0 4px 4px 0; 
+            box-shadow: 2px 0 12px rgba(96, 165, 250, 0.6); 
+        }
+
+        .tech-card { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .tech-card::before { content: ''; position: absolute; top: 10px; left: 10px; width: 6px; height: 6px; border-top: 1px solid rgba(255, 255, 255, 0.15); border-left: 1px solid rgba(255, 255, 255, 0.15); }
+        .scanline { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent); position: absolute; top: 0; animation: scan 4s linear infinite; }
+        @keyframes scan { 0% { top: 0%; } 100% { top: 100%; } }
+        .status-pulse { animation: status-pulse 3s infinite ease-in-out; }
+        @keyframes status-pulse { 0%, 100% { transform: scale(1); filter: brightness(1); } 50% { transform: scale(1.03); filter: brightness(1.25); } }
+        .page-transition { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        main { padding-left: calc(var(--sidebar-width) + 16px); padding-right: 16px; padding-top: 100px; }
+        @media (max-width: 640px) { :root { --sidebar-width: 64px; } main { padding-left: calc(var(--sidebar-width) + 12px); } }
         ::-webkit-scrollbar { display: none; }
-
-        /* 헤더 우측 컨트롤 버튼 스타일 */
-        .header-control-btn {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-            transition: all 0.2s ease;
+        
+        .header-control-btn { 
+            background: rgba(255, 255, 255, 0.04); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            padding: 0 14px; 
+            height: 44px; 
+            border-radius: 14px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            color: #64748b; 
+            transition: all 0.2s ease; 
         }
-        .header-control-btn:active { transform: scale(0.9); background: rgba(255, 255, 255, 0.1); }
+        .header-control-btn:active { transform: scale(0.95); background: rgba(255, 255, 255, 0.08); }
+        .header-control-btn span { font-size: 10px; font-weight: 800; letter-spacing: 0.05em; color: #94a3b8; }
+        
+        .grade-row { display: grid; grid-template-columns: 2fr 3fr 4fr; gap: 8px; padding: 10px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 4px; font-size: 10px; align-items: center; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col select-none lvl-1">
 
-    <!-- 동적 배경 -->
-    <div id="aurora-bg">
-        <div class="aurora-layer glow-1"></div>
-        <div class="aurora-layer glow-2"></div>
-        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px;"></div>
-    </div>
+    <div id="aurora-bg"><div class="aurora-layer glow-1"></div><div class="aurora-layer glow-2"></div><div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(white 1px, transparent 1px); background-size: 40px 40px;"></div></div>
 
-    <!-- 사이드 레일 내비게이션 -->
+    <!-- 사이드 레일 내비게이션 (가시성 개선 버전) -->
     <aside class="side-rail">
-        <!-- 로고 버튼 -->
-        <button onclick="navigateTo('home')" class="mb-10 mt-2">
-            <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-900/40">
-                <i data-lucide="satellite" class="w-6 h-6 text-white"></i>
-            </div>
+        <button onclick="navigateTo('home')" class="mb-12 mt-2 group">
+            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-700 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-900/40 group-active:scale-90 transition-transform"><i data-lucide="satellite" class="w-7 h-7 text-white"></i></div>
         </button>
-
-        <nav class="flex flex-col gap-4">
-            <button onclick="navigateTo('home')" id="rail-home" class="nav-item active" title="Dashboard">
-                <i data-lucide="layout-grid" class="w-6 h-6"></i>
-            </button>
-            <button onclick="navigateTo('details')" id="rail-details" class="nav-item" title="Logs">
-                <i data-lucide="activity" class="w-6 h-6"></i>
-            </button>
-            <button onclick="navigateTo('info')" id="rail-info" class="nav-item" title="Library">
-                <i data-lucide="book-open" class="w-6 h-6"></i>
-            </button>
+        <nav class="flex flex-col items-center">
+            <button onclick="navigateTo('home')" id="rail-home" class="nav-item active" title="Dashboard"><i data-lucide="layout-grid" class="w-6 h-6"></i></button>
+            <button onclick="navigateTo('details')" id="rail-details" class="nav-item" title="Logs"><i data-lucide="activity" class="w-6 h-6"></i></button>
+            <button onclick="navigateTo('info')" id="rail-info" class="nav-item" title="Library"><i data-lucide="book-open" class="w-6 h-6"></i></button>
         </nav>
     </aside>
 
-    <!-- 고정 헤더 (제목 및 설정 버튼 통합) -->
     <header class="fixed top-0 left-0 right-0 z-40 flex items-center h-24 px-6">
-        <!-- 제목 섹션 -->
         <div class="flex flex-col ml-[var(--sidebar-width)]" style="margin-left: var(--sidebar-width);">
-            <span class="font-black text-[10px] tracking-[0.3em] uppercase text-white/40">SpaceWeather Intel</span>
+            <span class="font-black text-[10px] tracking-[0.3em] uppercase text-white/40">SpaceWeather Analysis</span>
             <h1 id="screenTitle" class="text-xl font-black uppercase tracking-tight">Observation Dash</h1>
         </div>
-        
-        <!-- 우측 상단 컨트롤 영역 (여기서 설정을 관리합니다) -->
-        <div class="ml-auto flex items-center gap-3">
-            <div id="loadingIndicator" class="hidden text-blue-500 text-[9px] font-black animate-pulse flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl border border-blue-500/20">
-                <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i> SYNC
-            </div>
-            
-            <!-- 모드 퀵 버튼 -->
-            <button onclick="toggleAppMode()" class="header-control-btn" id="header-mode-btn">
-                <i data-lucide="zap" id="modeIcon" class="w-5 h-5 text-blue-400"></i>
-            </button>
-            
-            <!-- 설정 버튼 (상단으로 이동) -->
-            <button onclick="toggleSettings()" class="header-control-btn">
-                <i data-lucide="settings" class="w-5 h-5"></i>
-            </button>
+        <div class="ml-auto flex items-center gap-2">
+            <div id="loadingIndicator" class="hidden text-blue-500 text-[9px] font-black animate-pulse flex items-center gap-1.5 bg-blue-500/10 px-3 py-2 rounded-xl border border-blue-500/20"><i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i> SYNCING</div>
+            <button onclick="toggleAppMode()" class="header-control-btn" id="header-mode-btn"><i data-lucide="zap" id="modeIcon" class="w-4 h-4 text-blue-400"></i><span id="modeLabelText" class="uppercase">Live</span></button>
+            <button onclick="toggleSettings()" class="header-control-btn"><i data-lucide="settings" class="w-4 h-4"></i><span class="uppercase">Config</span></button>
         </div>
     </header>
 
-    <!-- 설정 패널 (기능 보완) -->
-    <div id="settingsPanel" class="hidden glass fixed top-28 left-[80px] right-6 z-[60] p-7 rounded-[2.5rem] border-white/10 shadow-2xl page-transition max-w-sm ml-auto mr-0">
+    <div id="settingsPanel" class="hidden glass fixed top-28 left-[84px] right-6 z-[60] p-7 rounded-[2.5rem] border-white/10 shadow-2xl page-transition max-w-sm ml-auto mr-0">
         <div class="flex flex-col gap-6">
-            <!-- 모드 선택 섹션 -->
             <section>
-                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2">
-                    <i data-lucide="database" class="w-3 h-3"></i> Data Stream Mode
-                </h4>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2"><i data-lucide="database" class="w-3 h-3"></i> Data Stream Mode</h4>
                 <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-2xl border border-white/5">
                     <button onclick="setMode('REALTIME')" id="btn-mode-rt" class="py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all">Realtime</button>
                     <button onclick="setMode('DEMO')" id="btn-mode-demo" class="py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all">Demo View</button>
                 </div>
             </section>
-
-            <!-- API 키 설정 섹션 -->
             <section>
-                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2">
-                    <i data-lucide="key" class="w-3 h-3"></i> NASA API Access
-                </h4>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2"><i data-lucide="key" class="w-3 h-3"></i> NASA API Access</h4>
                 <input type="password" id="apiKeyInput" value="DEMO_KEY" class="w-full bg-black/50 border border-white/10 text-sm px-4 py-4 rounded-xl outline-none text-blue-400 mb-3 mono" placeholder="NASA API KEY">
                 <button onclick="applyNewApiKey()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40">Update Telemetry</button>
-                <div class="mt-3 text-center">
-                    <a href="https://api.nasa.gov/" target="_blank" class="text-[8px] text-gray-600 hover:text-blue-400 font-bold uppercase tracking-widest transition-colors">Generate NASA API Key →</a>
-                </div>
+                <div class="mt-3 text-center"><a href="https://api.nasa.gov/" target="_blank" class="text-[8px] text-gray-600 hover:text-blue-400 font-bold uppercase tracking-widest transition-colors">Generate NASA API Key →</a></div>
             </section>
         </div>
     </div>
 
-    <!-- 메인 콘텐츠 -->
     <main class="flex-grow pb-12">
-        
-        <!-- 대시보드 섹션 -->
         <section id="page-home" class="page-transition">
-            
             <div class="text-center mb-12 relative">
                 <div id="statusHero" class="relative inline-block">
-                    <!-- HUD 장식 -->
                     <div class="absolute -inset-6 border border-white/5 rounded-full animate-[spin_20s_linear_infinite] opacity-30"></div>
                     <div class="absolute -inset-10 border border-dashed border-white/10 rounded-full animate-[spin_40s_linear_infinite_reverse] opacity-10"></div>
-                    
                     <div class="relative bg-black/30 backdrop-blur-3xl px-8 py-10 rounded-full flex flex-col items-center justify-center min-w-[220px] min-h-[220px] border border-white/10 shadow-[0_0_60px_rgba(0,0,0,0.5)]">
-                        <div id="statusIcon" class="mb-4 status-pulse text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-                            <i data-lucide="shield-check" class="w-14 h-14"></i>
-                        </div>
+                        <div id="statusIcon" class="mb-4 status-pulse text-blue-400 drop-shadow-[0_0_15px_rgba(59,130,246,0.3)]"><i data-lucide="shield-check" class="w-14 h-14"></i></div>
                         <h3 id="statusLevelText" class="text-2xl font-black mb-1 uppercase tracking-tight">Steady</h3>
                         <p id="statusDescText" class="text-gray-500 text-[9px] max-w-[140px] leading-relaxed font-bold uppercase opacity-50">Observation Nominal</p>
                     </div>
                 </div>
-                
                 <div class="flex justify-center gap-1.5 mt-8">
                     <div class="h-1 w-8 rounded-full bg-white/5 transition-all duration-700" id="step-1"></div>
                     <div class="h-1 w-8 rounded-full bg-white/5 transition-all duration-700" id="step-2"></div>
@@ -295,83 +195,91 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="glass tech-card p-6 rounded-[2rem] active:scale-95 transition-all" onclick="showMetricInfo('FLR')">
                     <div class="scanline"></div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-2.5 bg-yellow-500/10 rounded-xl text-yellow-500 border border-yellow-500/20"><i data-lucide="sun" class="w-5 h-5"></i></div>
-                        <i data-lucide="info" class="w-3.5 h-3.5 text-gray-700"></i>
-                    </div>
+                    <div class="flex justify-between items-start mb-4"><div class="p-2.5 bg-yellow-500/10 rounded-xl text-yellow-500 border border-yellow-500/20"><i data-lucide="sun" class="w-5 h-5"></i></div><i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-700"></i></div>
                     <span id="flrCount" class="text-4xl font-black mono tracking-tighter text-yellow-500">0</span>
-                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mt-1">Solar Flares</p>
+                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mt-1">Solar Flares (R)</p>
                 </div>
-                
                 <div class="glass tech-card p-6 rounded-[2rem] active:scale-95 transition-all" onclick="showMetricInfo('CME')">
                     <div class="scanline"></div>
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="p-2.5 bg-blue-500/10 rounded-xl text-blue-500 border border-blue-500/20"><i data-lucide="zap" class="w-5 h-5"></i></div>
-                        <i data-lucide="info" class="w-3.5 h-3.5 text-gray-700"></i>
-                    </div>
+                    <div class="flex justify-between items-start mb-4"><div class="p-2.5 bg-blue-500/10 rounded-xl text-blue-500 border border-blue-500/20"><i data-lucide="zap" class="w-5 h-5"></i></div><i data-lucide="help-circle" class="w-3.5 h-3.5 text-gray-700"></i></div>
                     <span id="cmeCount" class="text-4xl font-black mono tracking-tighter text-blue-500">0</span>
-                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mt-1">CME Events</p>
+                    <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest mt-1">CME / S-Scale</p>
                 </div>
-
                 <div class="glass tech-card p-6 rounded-[2rem] col-span-1 sm:col-span-2 active:scale-95 transition-all" onclick="showMetricInfo('GST')">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <div class="p-3 bg-purple-500/10 rounded-2xl text-purple-500 border border-purple-500/20"><i data-lucide="activity" class="w-6 h-6"></i></div>
-                            <div>
-                                <p class="text-xs font-black text-gray-200 uppercase tracking-widest">Geomagnetic Alert</p>
-                                <p class="text-[9px] text-gray-600 font-bold uppercase tracking-tighter">Magnetic Stability</p>
-                            </div>
+                            <div><p class="text-xs font-black text-gray-200 uppercase tracking-widest">Geomagnetic storm (G)</p><p class="text-[9px] text-gray-600 font-bold uppercase tracking-tighter">Magnetic Kp Stability</p></div>
                         </div>
-                        <span id="gstCount" class="text-4xl font-black mono tracking-tighter text-purple-500">0</span>
+                        <div class="flex items-center gap-4"><span id="gstCount" class="text-4xl font-black mono tracking-tighter text-purple-500">0</span><i data-lucide="help-circle" class="w-4 h-4 text-gray-700"></i></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- 로그 섹션 -->
         <section id="page-details" class="hidden page-transition">
-            <div class="flex items-center justify-between mb-6">
-                <p id="dateRangeInfo" class="text-[10px] text-blue-500/60 font-black mono"></p>
-                <button onclick="fetchAllData(true)" class="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors">Refresh</button>
-            </div>
+            <div class="flex items-center justify-between mb-6"><p id="dateRangeInfo" class="text-[10px] text-blue-500/60 font-black mono"></p><button onclick="fetchAllData(true)" class="text-[9px] font-black uppercase text-gray-500 hover:text-white transition-colors">Refresh</button></div>
             <div id="eventList" class="flex flex-col gap-3"></div>
         </section>
 
-        <!-- 정보 섹션 -->
         <section id="page-info" class="hidden page-transition">
-            <div class="flex flex-col gap-4">
-                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
-                    <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center mb-4 text-blue-400 border border-blue-600/20"><i data-lucide="sun" class="w-5 h-5"></i></div>
-                    <h3 class="text-lg font-black mb-2 uppercase tracking-tight">Solar Flares</h3>
-                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">태양 표면에서 발생하는 강렬한 에너지 방출입니다. 강력한 전파를 방출하며, 지구 도달 시 무선 통신 두절(Radio Blackout)과 GPS 신호 왜곡의 주범이 됩니다.</p>
+            <div class="flex flex-col gap-8">
+                <div class="glass p-8 rounded-[2.5rem] border-white/5 relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-yellow-600/10 rounded-xl flex items-center justify-center text-yellow-500 border border-yellow-600/20"><i data-lucide="sun" class="w-6 h-6"></i></div>
+                        <div><h3 class="text-xl font-black uppercase tracking-tight">Solar Flares (R-Scale)</h3><p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">무선통신 장애 규모</p></div>
+                    </div>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 font-medium">태양 표면의 강력한 폭발로 에너지 입자와 방사선을 방출하는 현상입니다. 지구의 이온층을 교란시켜 무선 통신 두절을 유발합니다.</p>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <h4 class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-3">등급별 수치 및 지구 영향</h4>
+                        <div class="grade-row bg-emerald-500/5 text-emerald-400 border-emerald-500/10"><span>좋음 (정상)</span><span>Class B ~ C</span><span>영향 없음</span></div>
+                        <div class="grade-row bg-blue-500/5 text-blue-400 border-blue-500/10"><span>보통 (R1-2)</span><span>Class M1 ~ M5</span><span>일시적 단파 통신 장애</span></div>
+                        <div class="grade-row bg-orange-500/5 text-orange-400 border-orange-500/10"><span>나쁨 (R3-4)</span><span>Class X1 ~ X10</span><span>광범위한 블랙아웃, 위성 장애</span></div>
+                        <div class="grade-row bg-red-500/5 text-red-400 border-red-500/10"><span>매우나쁨 (R5)</span><span>Class X20+</span><span>전 지구적 통신 두절, 위성 고장</span></div>
+                    </div>
                 </div>
-                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
-                    <div class="w-10 h-10 bg-indigo-600/10 rounded-xl flex items-center justify-center mb-4 text-indigo-400 border border-indigo-600/20"><i data-lucide="zap" class="w-5 h-5"></i></div>
-                    <h3 class="text-lg font-black mb-2 uppercase tracking-tight">CME Events</h3>
-                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">코로나 질량 방출(CME)은 거대한 자성 플라스마 구름이 방출되는 현상입니다. 지구 도달 시 오로라를 만들기도 하지만, 인공위성의 궤도 이탈이나 하드웨어 고장을 유발할 수 있습니다.</p>
+                <div class="glass p-8 rounded-[2.5rem] border-white/5 relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-blue-600/10 rounded-xl flex items-center justify-center text-blue-400 border border-blue-600/20"><i data-lucide="zap" class="w-6 h-6"></i></div>
+                        <div><h3 class="text-xl font-black uppercase tracking-tight">CME / Radiation (S-Scale)</h3><p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">태양 복사 폭풍 규모</p></div>
+                    </div>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 font-medium">코로나 질량 방출(CME) 시 수반되는 양성자 입자 유속입니다. 우주 비행사 및 위성 하드웨어에 치명적인 방사선 피해를 줍니다.</p>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <h4 class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-3">등급별 수치 및 지구 영향</h4>
+                        <div class="grade-row bg-emerald-500/5 text-emerald-400 border-emerald-500/10"><span>좋음 (정상)</span><span>Flux < 10</span><span>영향 없음</span></div>
+                        <div class="grade-row bg-blue-500/5 text-blue-400 border-blue-500/10"><span>보통 (S1-2)</span><span>Flux 10 ~ 100</span><span>고위도 항공 방사선 증가</span></div>
+                        <div class="grade-row bg-orange-500/5 text-orange-400 border-orange-500/10"><span>나쁨 (S3-4)</span><span>Flux 10³ ~ 10⁴</span><span>우주비행 위험, 정밀기기 오작동</span></div>
+                        <div class="grade-row bg-red-500/5 text-red-400 border-red-500/10"><span>매우나쁨 (S5)</span><span>Flux 10⁵+</span><span>위성 메모리 파손, 전력망 유도전류</span></div>
+                    </div>
                 </div>
-                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
-                    <div class="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center mb-4 text-purple-400 border border-purple-600/20"><i data-lucide="activity" class="w-5 h-5"></i></div>
-                    <h3 class="text-lg font-black mb-2 uppercase tracking-tight">Geomagnetic Storm (GST)</h3>
-                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium mb-3">지자기 폭풍은 지구의 자기장이 외부(태양풍)의 충격으로 인해 일시적으로 크게 요동치는 현상입니다. Kp 지수(0~9)로 그 강도를 측정합니다.</p>
-                    <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
-                        <p class="text-[9px] text-gray-300 leading-relaxed font-bold italic">"왜 측정하나요?"</p>
-                        <p class="text-[9px] text-gray-500 leading-relaxed mt-1">강력한 지자기 폭풍은 지상의 전력망(Grid)에 과전류를 유도하여 대규모 정전을 일으킬 수 있습니다. 또한 항공기 운항 시 고위도 항로의 방사선 노출 위험과 정밀 항법 장치 보호를 위해 필수적으로 모니터링합니다.</p>
+                <div class="glass p-8 rounded-[2.5rem] border-white/5 relative overflow-hidden">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 bg-purple-600/10 rounded-xl flex items-center justify-center text-purple-400 border border-purple-600/20"><i data-lucide="activity" class="w-6 h-6"></i></div>
+                        <div><h3 class="text-xl font-black uppercase tracking-tight">Geomagnetic Storm (G-Scale)</h3><p class="text-[9px] text-gray-500 font-bold uppercase tracking-widest">지자기 폭풍 규모 (Kp 지수)</p></div>
+                    </div>
+                    <p class="text-gray-400 text-[11px] leading-relaxed mb-6 font-medium">태양풍과의 상호작용으로 지구 자기장이 급격히 변동하는 현상입니다. Kp 지수(0~9)로 측정하며, 지상의 전력 인프라에 가장 큰 영향을 미칩니다.</p>
+                    <div class="bg-black/40 p-4 rounded-2xl border border-white/5">
+                        <h4 class="text-[9px] font-black text-blue-400 uppercase tracking-widest mb-3">등급별 수치 및 지구 영향</h4>
+                        <div class="grade-row bg-emerald-500/5 text-emerald-400 border-emerald-500/10"><span>좋음 (정상)</span><span>Kp 0 ~ 4</span><span>오로라 없음, 전력망 안정</span></div>
+                        <div class="grade-row bg-blue-500/5 text-blue-400 border-blue-500/10"><span>보통 (G1-2)</span><span>Kp 5 ~ 6</span><span>전력망 제어 필요, 오로라 발생</span></div>
+                        <div class="grade-row bg-orange-500/5 text-orange-400 border-orange-500/10"><span>나쁨 (G3-4)</span><span>Kp 7 ~ 8</span><span>전력망 과부하 위험, GPS 오차 발생</span></div>
+                        <div class="grade-row bg-red-500/5 text-red-400 border-red-500/10"><span>매우나쁨 (G5)</span><span>Kp 9</span><span>대규모 정전 위험, 항공기 운항 금지</span></div>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- 측정 정보 모달 -->
     <div id="infoModalOverlay" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
         <div id="infoModalBody" class="w-full max-w-sm glass rounded-[3rem] p-8 border-white/20 shadow-2xl modal-fade-in relative overflow-hidden">
             <div class="scanline opacity-20"></div>
             <div id="infoModalIcon" class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-inner border border-white/5"></div>
-            <h3 id="infoModalTitle" class="text-xl font-black mb-3 uppercase tracking-tight"></h3>
-            <p id="infoModalDesc" class="text-gray-400 text-[11px] leading-relaxed mb-8 font-medium"></p>
+            <h3 id="infoModalTitle" class="text-xl font-black mb-1 uppercase tracking-tight"></h3>
+            <p id="infoModalSub" class="text-[9px] text-blue-400 font-black mb-4 uppercase tracking-[0.2em]"></p>
+            <p id="infoModalDesc" class="text-gray-400 text-[11px] leading-relaxed mb-6 font-medium"></p>
+            <div class="bg-black/50 p-4 rounded-2xl border border-white/5 mb-8"><h4 class="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-3">Grade Reference (NOAA)</h4><div id="infoModalGrades" class="flex flex-col gap-1.5"></div></div>
             <div class="flex flex-col gap-3">
-                <button onclick="goToDetailsFromModal()" class="py-4 bg-blue-600 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest active:scale-95 transition-all">View Logs</button>
+                <button onclick="goToDetailsFromModal()" class="py-4 bg-blue-600 rounded-2xl text-[10px] font-black text-white uppercase tracking-widest active:scale-95 transition-all">Telemetry Logs</button>
                 <button onclick="closeInfoModal()" class="py-4 bg-white/5 rounded-2xl text-[10px] font-black text-gray-500 border border-white/5 uppercase tracking-widest">Dismiss</button>
             </div>
         </div>
@@ -385,21 +293,19 @@
         };
 
         const METRIC_HELP = {
-            'FLR': { title: 'Solar Flare', desc: '태양 플레어는 강력한 전자기 방출입니다. 지구의 무선 통신 및 GPS 정확도에 직접적인 영향을 줄 수 있는 주요 지표입니다.', color: 'bg-yellow-500/10 text-yellow-500', icon: 'sun' },
-            'CME': { title: 'CME Tracking', desc: '코로나 질량 방출(CME)은 막대한 양의 자성 플라스마가 방출되는 것입니다. 지구 인프라 손상을 야기할 수 있는 위험 요소입니다.', color: 'bg-blue-500/10 text-blue-500', icon: 'zap' },
-            'GST': { title: 'Geomagnetic Storm', desc: '지자기 폭풍은 지구 자기장의 급격한 요동을 의미합니다. 전력망 시스템 안전을 위해 정밀하게 모니터링됩니다.', color: 'bg-purple-500/10 text-purple-500', icon: 'activity' }
+            'FLR': { title: 'Solar Flare', sub: '무선통신 장애 (R-Scale)', desc: '태양의 강력한 에너지 방출로 지구 이온층을 교란시켜 장거리 통신과 위성 운용에 장애를 줍니다.', color: 'bg-yellow-500/10 text-yellow-500', icon: 'sun', grades: [{ name: '좋음 (정상)', range: 'B ~ C Class', color: 'text-emerald-400 bg-emerald-500/10' }, { name: '보통 (R1-2)', range: 'M1 ~ M9 Class', color: 'text-blue-400 bg-blue-500/10' }, { name: '나쁨 (R3-4)', range: 'X1 ~ X10 Class', color: 'text-orange-400 bg-orange-500/10' }, { name: '매우 나쁨 (R5)', range: 'X20+ Class', color: 'text-red-500 bg-red-600/10' }] },
+            'CME': { title: 'CME Radiation', sub: '태양 복사 폭풍 (S-Scale)', desc: '태양 양성자 입자 유속으로, 위성 하드웨어 파손 및 항공기 탑승객 방사선 노출 위험을 초래합니다.', color: 'bg-blue-500/10 text-blue-500', icon: 'zap', grades: [{ name: '좋음 (정상)', range: 'Flux < 10', color: 'text-emerald-400 bg-emerald-500/10' }, { name: '보통 (S1-2)', range: 'Flux 10¹ ~ 10²', color: 'text-blue-400 bg-blue-500/10' }, { name: '나쁨 (S3-4)', range: 'Flux 10³ ~ 10⁴', color: 'text-orange-400 bg-orange-500/10' }, { name: '매우 나쁨 (S5)', range: 'Flux 10⁵+', color: 'text-red-500 bg-red-600/10' }] },
+            'GST': { title: 'Geomagnetic Storm', sub: '지자기 폭풍 (G-Scale)', desc: '태양풍 충격파에 의한 지구 자기장 요동으로 전력망 과부하 및 변압기 파손을 유발합니다.', color: 'bg-purple-500/10 text-purple-500', icon: 'activity', grades: [{ name: '좋음 (정상)', range: 'Kp 0 ~ 4', color: 'text-emerald-400 bg-emerald-500/10' }, { name: '보통 (G1-2)', range: 'Kp 5 ~ 6', color: 'text-blue-400 bg-blue-500/10' }, { name: '나쁨 (G3-4)', range: 'Kp 7 ~ 8', color: 'text-orange-400 bg-orange-500/10' }, { name: '매우 나쁨 (G5)', range: 'Kp 9', color: 'text-red-500 bg-red-600/10' }] }
         };
 
-        const CACHE_KEY = "sw_side_v6_cache";
+        const CACHE_KEY = "sw_side_v7_cache";
         const CACHE_TIME = 15 * 60 * 1000;
-
         let appState = { currentPage: 'home', data: { flr: [], cme: [], gst: [] }, isLoading: false, appMode: 'REALTIME', apiKey: 'DEMO_KEY' };
 
         function navigateTo(pageId) {
             appState.currentPage = pageId;
             const titles = { 'home': 'Observation Dash', 'details': 'Telemetry Logs', 'info': 'Phenomena Lib' };
             document.getElementById('screenTitle').innerText = titles[pageId];
-
             ['home', 'details', 'info'].forEach(id => {
                 const el = document.getElementById(`page-${id}`);
                 const rail = document.getElementById(`rail-${id}`);
@@ -414,139 +320,72 @@
             const info = METRIC_HELP[type];
             const overlay = document.getElementById('infoModalOverlay');
             const iconBox = document.getElementById('infoModalIcon');
+            const gradeContainer = document.getElementById('infoModalGrades');
             document.getElementById('infoModalTitle').innerText = info.title;
+            document.getElementById('infoModalSub').innerText = info.sub;
             document.getElementById('infoModalDesc').innerText = info.desc;
             iconBox.className = `w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-6 border border-white/5 ${info.color}`;
             iconBox.innerHTML = `<i data-lucide="${info.icon}" class="w-8 h-8"></i>`;
+            gradeContainer.innerHTML = info.grades.map(g => `<div class="flex justify-between items-center text-[10px] p-2.5 rounded-xl border border-white/5 bg-white/[0.02]"><span class="font-black ${g.color.split(' ')[0]} uppercase tracking-tighter">${g.name}</span><span class="font-mono text-gray-500 font-bold">${g.range}</span></div>`).join('');
             overlay.classList.remove('hidden');
             initIcons();
         }
 
         function closeInfoModal() { document.getElementById('infoModalOverlay').classList.add('hidden'); }
         function goToDetailsFromModal() { closeInfoModal(); navigateTo('details'); }
-        function toggleSettings() { 
-            const panel = document.getElementById('settingsPanel');
-            panel.classList.toggle('hidden');
-            updateSettingsUI();
-        }
-        
-        function setMode(mode) {
-            appState.appMode = mode;
-            updateSettingsUI();
-            updateModeUI();
-            fetchAllData(true);
-        }
-
-        function toggleAppMode() {
-            setMode(appState.appMode === 'REALTIME' ? 'DEMO' : 'REALTIME');
-        }
+        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('hidden'); }
+        function setMode(mode) { appState.appMode = mode; updateSettingsUI(); updateModeUI(); fetchAllData(true); }
+        function toggleAppMode() { setMode(appState.appMode === 'REALTIME' ? 'DEMO' : 'REALTIME'); }
 
         function updateSettingsUI() {
             const isRT = appState.appMode === 'REALTIME';
-            const rtBtn = document.getElementById('btn-mode-rt');
-            const demoBtn = document.getElementById('btn-mode-demo');
-            
-            rtBtn.className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${isRT ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-gray-500 hover:text-white'}`;
-            demoBtn.className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${!isRT ? 'bg-yellow-600 text-white shadow-lg shadow-yellow-900/40' : 'text-gray-500 hover:text-white'}`;
+            document.getElementById('btn-mode-rt').className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${isRT ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-500'}`;
+            document.getElementById('btn-mode-demo').className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${!isRT ? 'bg-yellow-600 text-white shadow-lg' : 'text-gray-500'}`;
         }
 
         function updateModeUI() {
             const isRT = appState.appMode === 'REALTIME';
-            const icon = document.getElementById('modeIcon');
-            
-            icon.className = `w-5 h-5 transition-all ${isRT ? 'text-blue-400' : 'text-yellow-400'}`;
-            icon.setAttribute('data-lucide', isRT ? 'zap' : 'test-tube-2');
+            document.getElementById('modeIcon').className = `w-4 h-4 transition-all ${isRT ? 'text-blue-400' : 'text-yellow-400'}`;
+            document.getElementById('modeIcon').setAttribute('data-lucide', isRT ? 'zap' : 'test-tube-2');
+            document.getElementById('modeLabelText').innerText = isRT ? 'LIVE' : 'DEMO';
             initIcons();
-        }
-
-        function applyNewApiKey() {
-            const input = document.getElementById('apiKeyInput').value.trim();
-            if (!input) return;
-            localStorage.removeItem(CACHE_KEY);
-            appState.apiKey = input;
-            appState.appMode = 'REALTIME';
-            appState.data = { flr: [], cme: [], gst: [] };
-            toggleSettings();
-            updateModeUI();
-            fetchAllData(true);
         }
 
         async function fetchAllData(force = false) {
             if (appState.isLoading) return;
             appState.isLoading = true;
             document.getElementById('loadingIndicator').classList.remove('hidden');
-
-            if (appState.appMode === 'DEMO') {
-                setTimeout(() => {
-                    appState.data = JSON.parse(JSON.stringify(MOCK_DATA));
-                    finalizeDataLoad("2024-05-01", "2024-05-20");
-                }, 800);
-                return;
-            }
-
+            if (appState.appMode === 'DEMO') { setTimeout(() => { appState.data = JSON.parse(JSON.stringify(MOCK_DATA)); finalizeDataLoad("2024-05-01", "2024-05-20"); }, 800); return; }
             const apiKey = appState.apiKey;
             const past = new Date(); past.setDate(past.getDate() - 30);
-            const start = past.toISOString().split('T')[0];
-            const end = new Date().toISOString().split('T')[0];
-
+            const start = past.toISOString().split('T')[0], end = new Date().toISOString().split('T')[0];
             try {
-                const fetchNASA = async (type) => {
-                    const r = await fetch(`https://api.nasa.gov/DONKI/${type}?startDate=${start}&endDate=${end}&api_key=${apiKey}`);
-                    return r.ok ? await r.json() : [];
-                };
+                const fetchNASA = async (type) => { const r = await fetch(`https://api.nasa.gov/DONKI/${type}?startDate=${start}&endDate=${end}&api_key=${apiKey}`); return r.ok ? await r.json() : []; };
                 const [flr, cme, gst] = await Promise.all([fetchNASA('FLR'), fetchNASA('CME'), fetchNASA('GST')]);
                 appState.data = { flr: Array.isArray(flr) ? flr : [], cme: Array.isArray(cme) ? cme : [], gst: Array.isArray(gst) ? gst : [] };
                 finalizeDataLoad(start, end);
-            } catch (e) {
-                appState.appMode = 'DEMO';
-                appState.data = JSON.parse(JSON.stringify(MOCK_DATA));
-                finalizeDataLoad("2024-05-01", "2024-05-20");
-                updateModeUI();
-            }
+            } catch (e) { appState.appMode = 'DEMO'; appState.data = JSON.parse(JSON.stringify(MOCK_DATA)); finalizeDataLoad("2024-05-01", "2024-05-20"); updateModeUI(); }
         }
 
-        function finalizeDataLoad(start, end) {
-            appState.isLoading = false;
-            document.getElementById('loadingIndicator').classList.add('hidden');
-            const rangeEl = document.getElementById('dateRangeInfo');
-            if (rangeEl) rangeEl.innerText = `${start.replace(/-/g,'.')} ~ ${end.replace(/-/g,'.')}`;
-            updateDashboard();
-            renderEventList();
-            calculateLevel();
-            initIcons();
-        }
-
-        function updateDashboard() {
-            document.getElementById('flrCount').innerText = appState.data.flr.length;
-            document.getElementById('cmeCount').innerText = appState.data.cme.length;
-            document.getElementById('gstCount').innerText = appState.data.gst.length;
-        }
+        function finalizeDataLoad(start, end) { appState.isLoading = false; document.getElementById('loadingIndicator').classList.add('hidden'); const rangeEl = document.getElementById('dateRangeInfo'); if (rangeEl) rangeEl.innerText = `${start.replace(/-/g,'.')} ~ ${end.replace(/-/g,'.')}`; updateDashboard(); renderEventList(); calculateLevel(); initIcons(); }
+        function updateDashboard() { document.getElementById('flrCount').innerText = appState.data.flr.length; document.getElementById('cmeCount').innerText = appState.data.cme.length; document.getElementById('gstCount').innerText = appState.data.gst.length; }
 
         function calculateLevel() {
             const { flr, gst } = appState.data;
             const hasX = flr.some(e => e.classType?.startsWith('X'));
             const kpMax = Math.max(...(gst.flatMap(g => g.allKpIndex?.map(k => k.kpRating) || [0])));
-
-            let level = 1;
-            let info = { text: "Steady", desc: "Minimal Activity", color: "text-blue-400", icon: "shield-check" };
-
+            let level = 1, info = { text: "Steady", desc: "Minimal Activity", color: "text-blue-400", icon: "shield-check" };
             if (kpMax >= 8) { level = 5; info = { text: "CRITICAL", desc: "Magnetic Storm", color: "text-red-500", icon: "alert-octagon" }; }
             else if (hasX) { level = 4; info = { text: "UNSTABLE", desc: "X-Class Flare Alert", color: "text-orange-500", icon: "zap" }; }
             else if (flr.length > 5 || kpMax >= 6) { level = 3; info = { text: "ACTIVE", desc: "Elevated Activity", color: "text-yellow-400", icon: "sun" }; }
             else if (flr.length > 0) { level = 2; info = { text: "NOMINAL", desc: "Standard State", color: "text-emerald-400", icon: "activity" }; }
-
             document.body.className = `min-h-screen flex flex-col select-none lvl-${level}`;
-            const iconC = document.getElementById('statusIcon');
-            iconC.className = `mb-4 status-pulse ${info.color} drop-shadow-[0_0_20px_currentColor]`;
-            iconC.innerHTML = `<i data-lucide="${info.icon}" class="w-14 h-14"></i>`;
+            document.getElementById('statusIcon').className = `mb-4 status-pulse ${info.color} drop-shadow-[0_0_20px_currentColor]`;
+            document.getElementById('statusIcon').innerHTML = `<i data-lucide="${info.icon}" class="w-14 h-14"></i>`;
             document.getElementById('statusLevelText').innerText = info.text;
             document.getElementById('statusLevelText').className = `text-2xl font-black mb-1 uppercase tracking-tight ${info.color}`;
             document.getElementById('statusDescText').innerText = info.desc;
-
-            for(let i=1; i<=5; i++) {
-                const s = document.getElementById(`step-${i}`);
-                if (s) s.className = `h-1 w-8 rounded-full transition-all duration-700 ${i <= level ? info.color.replace('text', 'bg') + ' shadow-[0_0_10px_currentColor]' : 'bg-white/5'}`;
-            }
+            for(let i=1; i<=5; i++) { const s = document.getElementById(`step-${i}`); if (s) s.className = `h-1 w-8 rounded-full transition-all duration-700 ${i <= level ? info.color.replace('text', 'bg') + ' shadow-[0_0_10px_currentColor]' : 'bg-white/5'}`; }
         }
 
         function renderEventList() {
@@ -556,34 +395,18 @@
             appState.data.cme.forEach(e => events.push({ ...e, type: 'CME', time: new Date(e.startTime) }));
             appState.data.gst.forEach(e => events.push({ ...e, type: 'GST', time: new Date(e.startTime) }));
             events.sort((a, b) => b.time - a.time);
-
-            if (events.length === 0) {
-                list.innerHTML = '<div class="p-20 text-center text-gray-700 text-[10px] font-black uppercase tracking-widest">No Records</div>';
-                return;
-            }
-
+            if (events.length === 0) { list.innerHTML = `<div class="p-16 glass rounded-[2.5rem] flex flex-col items-center text-center"><i data-lucide="database-zap" class="w-10 h-10 text-gray-700 mb-4"></i><p class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">No Recent Telemetry</p></div>`; initIcons(); return; }
             list.innerHTML = events.slice(0, 15).map(ev => {
                 let ic = "sun", cl = "text-yellow-500", t = ev.type, d = "";
                 if (ev.type === 'FLR') { ic = "flame"; cl = "text-orange-500"; t = `Flare (${ev.classType})`; d = ev.sourceLocation || 'UNC'; }
                 else if (ev.type === 'CME') { ic = "zap"; cl = "text-blue-500"; t = "CME Emission"; d = `${ev.cmeAnalyses?.[0]?.speed || '---'} km/s`; }
                 else if (ev.type === 'GST') { ic = "activity"; cl = "text-purple-500"; t = "Geomagnetic"; d = `Kp: ${ev.allKpIndex?.[0]?.kpRating || '---'}`; }
-
-                return `
-                    <div class="glass p-5 rounded-[2rem] flex items-center justify-between border-white/5 tech-card overflow-hidden">
-                        <div class="flex items-center gap-4">
-                            <div class="p-3.5 bg-black/40 rounded-2xl ${cl} border border-white/5"><i data-lucide="${ic}" class="w-5 h-5"></i></div>
-                            <div><p class="text-xs font-black text-gray-200 uppercase tracking-tight">${t}</p><p class="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">${d}</p></div>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[10px] text-gray-400 font-black mono">${ev.time.getMonth()+1}/${ev.time.getDate()}</p>
-                            <p class="text-[9px] text-gray-700 font-black mono uppercase mt-1">${ev.time.getHours()}:${String(ev.time.getMinutes()).padStart(2,'0')}</p>
-                        </div>
-                    </div>
-                `;
+                return `<div class="glass p-5 rounded-[2rem] flex items-center justify-between border-white/5 tech-card overflow-hidden"><div class="flex items-center gap-4"><div class="p-3.5 bg-black/40 rounded-2xl ${cl} border border-white/5"><i data-lucide="${ic}" class="w-5 h-5"></i></div><div><p class="text-xs font-black text-gray-200 uppercase tracking-tight">${t}</p><p class="text-[9px] text-gray-600 font-black uppercase mt-1 tracking-widest">${d}</p></div></div><div class="text-right"><p class="text-[10px] text-gray-400 font-black mono">${ev.time.getMonth()+1}/${ev.time.getDate()}</p><p class="text-[9px] text-gray-700 font-black mono uppercase mt-1">${ev.time.getHours()}:${String(ev.time.getMinutes()).padStart(2,'0')}</p></div></div>`;
             }).join('');
             initIcons();
         }
 
+        function applyNewApiKey() { const input = document.getElementById('apiKeyInput').value.trim(); if (!input) return; localStorage.removeItem(CACHE_KEY); appState.apiKey = input; appState.appMode = 'REALTIME'; appState.data = { flr: [], cme: [], gst: [] }; toggleSettings(); updateModeUI(); fetchAllData(true); }
         function initIcons() { if (typeof lucide !== 'undefined') lucide.createIcons(); }
         window.onload = () => { fetchAllData(); document.getElementById('infoModalOverlay').addEventListener('click', function(e) { if(e.target === this) closeInfoModal(); }); };
     </script>
