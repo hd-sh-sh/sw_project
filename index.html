@@ -84,7 +84,7 @@
             border-right: 1px solid rgba(255, 255, 255, 0.1);
             z-index: 50;
             display: flex;
-            flex-col: column;
+            flex-direction: column;
             align-items: center;
             padding: 20px 0;
         }
@@ -193,8 +193,10 @@
         </nav>
 
         <div class="mt-auto mb-6 flex flex-col gap-4">
-            <button onclick="toggleAppMode()" class="nav-item">
+            <!-- 모드 전환 요약 표시 -->
+            <button onclick="toggleAppMode()" class="nav-item group" id="rail-mode-toggle">
                 <i data-lucide="zap" id="modeIcon" class="w-5 h-5 text-blue-400"></i>
+                <span class="absolute left-full ml-4 px-2 py-1 bg-gray-900 text-[8px] rounded opacity-0 group-hover:opacity-100 whitespace-nowrap transition-opacity font-bold uppercase tracking-widest border border-white/10" id="modeTooltip">Realtime</span>
             </button>
             <button onclick="toggleSettings()" class="nav-item">
                 <i data-lucide="settings" class="w-5 h-5"></i>
@@ -214,11 +216,32 @@
         </div>
     </header>
 
-    <!-- 설정 패널 -->
-    <div id="settingsPanel" class="hidden glass fixed top-24 left-[80px] right-4 z-[60] p-6 rounded-[2rem] border-white/10 shadow-2xl page-transition max-w-sm">
-        <h4 class="text-xs font-black uppercase tracking-widest mb-4 flex items-center gap-2"><i data-lucide="key" class="w-3 h-3"></i> NASA API Access</h4>
-        <input type="password" id="apiKeyInput" value="DEMO_KEY" class="w-full bg-black/50 border border-white/10 text-sm px-4 py-4 rounded-xl outline-none text-blue-400 mb-3 mono" placeholder="NASA API KEY">
-        <button onclick="applyNewApiKey()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest">Update Telemetry</button>
+    <!-- 설정 패널 (기능 복구) -->
+    <div id="settingsPanel" class="hidden glass fixed top-24 left-[80px] right-4 z-[60] p-7 rounded-[2.5rem] border-white/10 shadow-2xl page-transition max-w-sm">
+        <div class="flex flex-col gap-6">
+            <!-- 모드 선택 섹션 -->
+            <section>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2">
+                    <i data-lucide="database" class="w-3 h-3"></i> Data Stream Mode
+                </h4>
+                <div class="grid grid-cols-2 gap-2 p-1 bg-black/40 rounded-2xl border border-white/5">
+                    <button onclick="setMode('REALTIME')" id="btn-mode-rt" class="py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all">Realtime</button>
+                    <button onclick="setMode('DEMO')" id="btn-mode-demo" class="py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all">Demo View</button>
+                </div>
+            </section>
+
+            <!-- API 키 설정 섹션 -->
+            <section>
+                <h4 class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-400 flex items-center gap-2">
+                    <i data-lucide="key" class="w-3 h-3"></i> NASA API Access
+                </h4>
+                <input type="password" id="apiKeyInput" value="DEMO_KEY" class="w-full bg-black/50 border border-white/10 text-sm px-4 py-4 rounded-xl outline-none text-blue-400 mb-3 mono" placeholder="NASA API KEY">
+                <button onclick="applyNewApiKey()" class="w-full bg-blue-600 text-white py-4 rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-blue-900/40">Update Telemetry</button>
+                <div class="mt-3 text-center">
+                    <a href="https://api.nasa.gov/" target="_blank" class="text-[8px] text-gray-600 hover:text-blue-400 font-bold uppercase tracking-widest transition-colors">Generate NASA API Key →</a>
+                </div>
+            </section>
+        </div>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -296,18 +319,27 @@
             <div id="eventList" class="flex flex-col gap-3"></div>
         </section>
 
-        <!-- 정보 섹션 -->
+        <!-- 정보 섹션 (GST 추가) -->
         <section id="page-info" class="hidden page-transition">
             <div class="flex flex-col gap-4">
-                <div class="glass p-6 rounded-[2rem] border-white/5 relative overflow-hidden">
+                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
                     <div class="w-10 h-10 bg-blue-600/10 rounded-xl flex items-center justify-center mb-4 text-blue-400 border border-blue-600/20"><i data-lucide="sun" class="w-5 h-5"></i></div>
                     <h3 class="text-lg font-black mb-2 uppercase tracking-tight">Solar Flares</h3>
-                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">태양 표면에서 발생하는 강렬한 에너지 방출입니다. X선 및 전자기파가 지구 통신 장비에 영향을 미칠 수 있습니다.</p>
+                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">태양 표면에서 발생하는 강렬한 에너지 방출입니다. 강력한 전파를 방출하며, 지구 도달 시 무선 통신 두절(Radio Blackout)과 GPS 신호 왜곡의 주범이 됩니다.</p>
                 </div>
-                <div class="glass p-6 rounded-[2rem] border-white/5 relative overflow-hidden">
-                    <div class="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center mb-4 text-purple-400 border border-purple-600/20"><i data-lucide="waves" class="w-5 h-5"></i></div>
+                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
+                    <div class="w-10 h-10 bg-indigo-600/10 rounded-xl flex items-center justify-center mb-4 text-indigo-400 border border-indigo-600/20"><i data-lucide="zap" class="w-5 h-5"></i></div>
                     <h3 class="text-lg font-black mb-2 uppercase tracking-tight">CME Events</h3>
-                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">코로나 질량 방출은 거대한 플라스마 구름이 우주로 뿜어지는 현상으로, 오로라 생성 및 전력망 간섭의 원인이 됩니다.</p>
+                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium">코로나 질량 방출(CME)은 거대한 자성 플라스마 구름이 방출되는 현상입니다. 지구 도달 시 오로라를 만들기도 하지만, 인공위성의 궤도 이탈이나 하드웨어 고장을 유발할 수 있습니다.</p>
+                </div>
+                <div class="glass p-7 rounded-[2.5rem] border-white/5 relative overflow-hidden group">
+                    <div class="w-10 h-10 bg-purple-600/10 rounded-xl flex items-center justify-center mb-4 text-purple-400 border border-purple-600/20"><i data-lucide="activity" class="w-5 h-5"></i></div>
+                    <h3 class="text-lg font-black mb-2 uppercase tracking-tight">Geomagnetic Storm (GST)</h3>
+                    <p class="text-gray-400 text-[10px] leading-relaxed font-medium mb-3">지자기 폭풍은 지구의 자기장이 외부(태양풍)의 충격으로 인해 일시적으로 크게 요동치는 현상입니다. Kp 지수(0~9)로 그 강도를 측정합니다.</p>
+                    <div class="p-4 bg-black/40 rounded-2xl border border-white/5">
+                        <p class="text-[9px] text-gray-300 leading-relaxed font-bold italic">"왜 측정하나요?"</p>
+                        <p class="text-[9px] text-gray-500 leading-relaxed mt-1">강력한 지자기 폭풍은 지상의 전력망(Grid)에 과전류를 유도하여 대규모 정전을 일으킬 수 있습니다. 또한 항공기 운항 시 고위도 항로의 방사선 노출 위험과 정밀 항법 장치 보호를 위해 필수적으로 모니터링합니다.</p>
+                    </div>
                 </div>
             </div>
         </section>
@@ -317,7 +349,7 @@
     <div id="infoModalOverlay" class="hidden fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6">
         <div id="infoModalBody" class="w-full max-w-sm glass rounded-[3rem] p-8 border-white/20 shadow-2xl modal-fade-in relative overflow-hidden">
             <div class="scanline opacity-20"></div>
-            <div id="infoModalIcon" class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-inner"></div>
+            <div id="infoModalIcon" class="w-16 h-16 rounded-[1.5rem] flex items-center justify-center mb-6 shadow-inner border border-white/5"></div>
             <h3 id="infoModalTitle" class="text-xl font-black mb-3 uppercase tracking-tight"></h3>
             <p id="infoModalDesc" class="text-gray-400 text-[11px] leading-relaxed mb-8 font-medium"></p>
             <div class="flex flex-col gap-3">
@@ -340,7 +372,7 @@
             'GST': { title: 'Geomagnetic Storm', desc: '지자기 폭풍은 지구 자기장의 급격한 요동을 의미합니다. 전력망 시스템 안전을 위해 정밀하게 모니터링됩니다.', color: 'bg-purple-500/10 text-purple-500', icon: 'activity' }
         };
 
-        const CACHE_KEY = "sw_side_v5_cache";
+        const CACHE_KEY = "sw_side_v6_cache";
         const CACHE_TIME = 15 * 60 * 1000;
 
         let appState = { currentPage: 'home', data: { flr: [], cme: [], gst: [] }, isLoading: false, appMode: 'REALTIME', apiKey: 'DEMO_KEY' };
@@ -374,13 +406,52 @@
 
         function closeInfoModal() { document.getElementById('infoModalOverlay').classList.add('hidden'); }
         function goToDetailsFromModal() { closeInfoModal(); navigateTo('details'); }
-        function toggleSettings() { document.getElementById('settingsPanel').classList.toggle('hidden'); }
+        function toggleSettings() { 
+            const panel = document.getElementById('settingsPanel');
+            panel.classList.toggle('hidden');
+            updateSettingsUI();
+        }
         
+        function setMode(mode) {
+            appState.appMode = mode;
+            updateSettingsUI();
+            updateModeUI();
+            fetchAllData(true);
+        }
+
         function toggleAppMode() {
-            appState.appMode = appState.appMode === 'REALTIME' ? 'DEMO' : 'REALTIME';
+            setMode(appState.appMode === 'REALTIME' ? 'DEMO' : 'REALTIME');
+        }
+
+        function updateSettingsUI() {
+            const isRT = appState.appMode === 'REALTIME';
+            const rtBtn = document.getElementById('btn-mode-rt');
+            const demoBtn = document.getElementById('btn-mode-demo');
+            
+            rtBtn.className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${isRT ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' : 'text-gray-500 hover:text-white'}`;
+            demoBtn.className = `py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter transition-all ${!isRT ? 'bg-yellow-600 text-white shadow-lg shadow-yellow-900/40' : 'text-gray-500 hover:text-white'}`;
+        }
+
+        function updateModeUI() {
+            const isRT = appState.appMode === 'REALTIME';
             const icon = document.getElementById('modeIcon');
-            icon.className = `w-5 h-5 transition-all ${appState.appMode === 'REALTIME' ? 'text-blue-400' : 'text-yellow-400'}`;
-            icon.setAttribute('data-lucide', appState.appMode === 'REALTIME' ? 'zap' : 'test-tube-2');
+            const tooltip = document.getElementById('modeTooltip');
+            
+            icon.className = `w-5 h-5 transition-all ${isRT ? 'text-blue-400' : 'text-yellow-400'}`;
+            icon.setAttribute('data-lucide', isRT ? 'zap' : 'test-tube-2');
+            tooltip.innerText = isRT ? 'Realtime' : 'Demo View';
+            initIcons();
+        }
+
+        function applyNewApiKey() {
+            const input = document.getElementById('apiKeyInput').value.trim();
+            if (!input) return;
+            localStorage.removeItem(CACHE_KEY);
+            appState.apiKey = input;
+            appState.appMode = 'REALTIME';
+            appState.data = { flr: [], cme: [], gst: [] };
+            toggleSettings();
+            updateModeUI();
             fetchAllData(true);
         }
 
@@ -414,6 +485,7 @@
                 appState.appMode = 'DEMO';
                 appState.data = JSON.parse(JSON.stringify(MOCK_DATA));
                 finalizeDataLoad("2024-05-01", "2024-05-20");
+                updateModeUI();
             }
         }
 
